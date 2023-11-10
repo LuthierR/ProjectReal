@@ -7,6 +7,7 @@ import random
 # 3/11/2023
 # 5/11/2023
 # 6/11/2023 add game over menu
+# 7/11/2023 add game over menu quit and continue
 pygame.init()
 
 # Constants
@@ -45,15 +46,31 @@ menu_rect = menu_text.get_rect(center=(WIDTH//2,HEIGHT//2))
 object_size = 20
 object_speed = 10
 # game over
-continue_font = pygame.font.Font(None, 40)
-game_over_font = pygame.font.Font(None, 40)
+continue_font = pygame.font.Font(None, 30)
+game_over_font = pygame.font.Font(None, 80)
 game_over_text = game_over_font.render("GAME OVER", True, WHITE)
 continue_text = continue_font.render("Press SPACE to CONTINUE", True, WHITE)
 game_over_rect = game_over_text.get_rect(center=(WIDTH//2,HEIGHT//3))
 continue_rect = continue_text.get_rect(center=(WIDTH//2,HEIGHT//2))
-
-game_over = False
+escape_font = pygame.font.Font(None, 20)
+escape_text = escape_font.render("Press Continue and Hover mouse out the Window to Quit", True, WHITE)
+escape_rect = escape_text.get_rect(center=(WIDTH//2,HEIGHT//3+200))
 falling_objects = []
+
+def display_game_over_statistics():
+    screen.fill(BLACK)
+    screen.blit(game_over_text, game_over_rect)
+
+    stats_font = pygame.font.Font(None, 36)
+    score_text = stats_font.render(f"Score: {score}", True, WHITE)
+    stats_text_rect = score_text.get_rect(center=(WIDTH//2, HEIGHT//4))
+    screen.blit(score_text, stats_text_rect)
+
+    continue_text = continue_font.render("Press SPACE to Restart", True, WHITE)
+    continue_rect = continue_text.get_rect(center=(WIDTH//2, HEIGHT//2))
+    screen.blit(continue_text, continue_rect)
+
+    pygame.display.update()
 
 def create_falling_object():
     x = random.randint(0, WIDTH - meteor_width)
@@ -84,18 +101,14 @@ while not game_over:
         if keys[pygame.K_SPACE] and game_over == True:
             game_over = False
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            game_over = True
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             if not game_started and game_over:
                 game_started = True
                 game_over = False
                 score = 0
                 falling_objects = []
+            elif event.key == pygame.K_ESCAPE:
+                game_over = True
     
-    if delay_timer > 0:
-        delay_timer -= 1
-        continue
 
     if not game_started:
         screen.fill(BLACK)
@@ -149,6 +162,7 @@ while not game_over:
     score_text = font.render(f"Score: {score}", True, WHITE)
     screen.blit(score_text, (10, 10))
 
+
     # if game_over == True:
     #     screen.fill(BLACK)
     #     screen.blit(game_over_text, game_over_rect)
@@ -185,33 +199,26 @@ while not game_over:
     #     player_rect.x -= 5
     # if keys[pygame.K_RIGHT] and player_rect.right < WIDTH:
     #     player_rect.x += 5
-while game_over:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            game_over = True
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if game_over:
-                game_started = True
-                game_over = False
-                score = 0
-                falling_objects = []
+    while game_over:
+        keys = pygame.key.get_pressed()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if game_over:
+                    game_started = True
+                    game_over = False
+                    score = 0
+                    falling_objects = []
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and event.key == pygame.K_q:
+                    pygame.quit()
+                    sys.exit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE and event.key == pygame.K_q:
+                pygame.quit()
+                sys.exit()
 
-    screen.fill(BLACK)
-    screen.blit(game_over_text, game_over_rect)
-    screen.blit(continue_text, continue_rect)
-    pygame.display.update()
-    if game_over == True:
         screen.fill(BLACK)
+        screen.blit(escape_text, escape_rect)
         screen.blit(game_over_text, game_over_rect)
         screen.blit(continue_text, continue_rect)
         pygame.display.update()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            game_over = True
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if game_over: #reset
-                game_over = False
-                score = 0
-                falling_objects = []
-pygame.quit()
-sys.exit()
